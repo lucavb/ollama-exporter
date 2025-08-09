@@ -35,7 +35,6 @@ export default {
                 },
             },
         ],
-        '@semantic-release/changelog',
         [
             '@semantic-release/npm',
             {
@@ -45,18 +44,9 @@ export default {
         [
             '@semantic-release/exec',
             {
-                prepareCmd:
-                    'sed -i "s/export const VERSION = .*/export const VERSION = \'${nextRelease.version}\';/" src/index.ts',
                 publishCmd: './scripts/docker-publish.sh ${nextRelease.version} $DOCKERHUB_USERNAME',
                 successCmd:
                     'echo "new_release_published=true" >> $GITHUB_OUTPUT && echo "new_release_version=${nextRelease.version}" >> $GITHUB_OUTPUT',
-            },
-        ],
-        [
-            '@semantic-release/git',
-            {
-                assets: ['package.json', 'package-lock.json', 'CHANGELOG.md', 'src/index.ts'],
-                message: 'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
             },
         ],
         '@semantic-release/github',
