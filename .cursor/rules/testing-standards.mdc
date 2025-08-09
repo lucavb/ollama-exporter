@@ -1,0 +1,26 @@
+---
+globs: *.spec.ts,*.test.ts
+---
+
+# Testing Standards
+
+## Test Framework & Structure
+- Use **Vitest** as the testing framework (not Jest)
+- Place test files **next to source files** with `.spec.ts` extension (not in separate `__tests__` folders)
+- Example: `src/logger.spec.ts` tests `src/logger.ts`
+
+## Test Organization
+- Follow the existing pattern established in [src/logger.spec.ts](mdc:src/logger.spec.ts)
+- Use descriptive test names that explain the behavior being tested
+- Group related tests using `describe` blocks
+- Test both success and error scenarios
+
+## Testing Approach
+- Mock external dependencies (like Ollama API calls) appropriately
+- Test CLI argument parsing and validation
+- Verify metrics collection and formatting
+- Ensure proper error handling and logging
+
+## Running Tests
+- Use `npm test` or `npm run cq:test` to execute the test suite
+- Tests should be part of the continuous integration pipeline

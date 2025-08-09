@@ -1,0 +1,25 @@
+# Conventional Commits for ollama-exporter
+#
+# Format: <type>(<scope>): <description>
+#
+# Types:
+#   feat:     New feature (triggers minor version bump)
+#   fix:      Bug fix (triggers patch version bump)
+#   docs:     Documentation changes
+#   style:    Code style changes (formatting, etc.)
+#   refactor: Code refactoring
+#   perf:     Performance improvements
+#   test:     Adding or fixing tests
+#   chore:    Maintenance tasks
+#   ci:       CI/CD changes
+#   build:    Build system changes
+#
+# BREAKING CHANGE: (triggers major version bump)
+# Add "BREAKING CHANGE: <description>" in the footer
+#
+# Examples:
+#   feat: add model temperature monitoring
+#   fix: handle connection timeouts gracefully
+#   docs: update Docker setup instructions
+#   feat!: change API response format
+#   BREAKING CHANGE: API now returns different structure

@@ -1,0 +1,28 @@
+---
+globs: *.ts,*.js
+---
+
+# TypeScript/JavaScript Coding Standards
+
+## Type Safety & Patterns
+- Use TypeScript with strict type checking enabled
+- Prefer explicit typing over `any`
+- Use Zod schemas with **camelCase naming** (not PascalCase)
+- Leverage commander.js extra-typings for type-safe CLI parsing
+
+## Dependencies & Tooling
+- **Testing**: Use Vitest framework (not Jest)
+- **Build**: No ts-node usage - use direct TypeScript execution with `--experimental-strip-types`
+- **Package.json**: Do not include 'prepare' scripts
+- **AWS Configuration**: Set AWS profiles manually, not through .env files
+
+## Code Organization
+- Keep functions pure and testable where possible
+- Use proper error handling with structured logging
+- Follow the existing patterns in [src/exporter.ts](mdc:src/exporter.ts) for async operations
+- Maintain consistent import ordering: Node.js built-ins, third-party, local modules
+
+## Error Handling
+- Use structured error logging via [src/logger.ts](mdc:src/logger.ts)
+- Provide meaningful error messages for CLI users
+- Handle Ollama API failures gracefully with appropriate retries

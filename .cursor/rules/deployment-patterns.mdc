@@ -1,0 +1,34 @@
+---
+globs: Dockerfile,docker-entrypoint.sh,install-systemd.sh
+---
+
+# Deployment & Containerization Patterns
+
+## Docker Strategy
+- Use multi-stage builds with Node.js 24 Alpine base image
+- Build dependencies in separate stage, copy only necessary files to runtime
+- Run as non-root user `ollama-exporter` (UID 1000)
+- Health check endpoint at `/health` with appropriate intervals
+
+## Container Configuration
+- Expose port 8000 by default
+- Use [docker-entrypoint.sh](mdc:docker-entrypoint.sh) for proper environment variable handling
+- Set appropriate OCI labels for metadata
+- Support all standard environment variables
+
+## Systemd Service
+- Use [install-systemd.sh](mdc:install-systemd.sh) for automated service installation
+- Install to `/opt/ollama-exporter` with dedicated system user
+- Configuration via `/etc/ollama-exporter.env` environment file
+- Proper security hardening (NoNewPrivileges, PrivateTmp, etc.)
+
+## Build Process
+- `npm ci --omit=dev` for production dependencies only
+- TypeScript compilation for validation but direct TS execution for runtime
+- Proper file ownership and permissions in container and systemd setups
+
+## Security Considerations
+- Non-root execution in all deployment scenarios
+- Minimal container attack surface with Alpine Linux
+- Systemd security hardening features enabled
+- No sensitive data in environment variables or logs

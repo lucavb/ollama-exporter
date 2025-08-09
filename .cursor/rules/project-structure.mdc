@@ -1,0 +1,29 @@
+---
+alwaysApply: true
+---
+
+# Ollama Exporter Project Structure
+
+This is a Node.js/TypeScript Prometheus exporter for Ollama metrics.
+
+## Core Architecture
+- Main entry point: [src/index.ts](mdc:src/index.ts) - CLI setup, HTTP server, and application bootstrapping
+- Core exporter logic: [src/exporter.ts](mdc:src/exporter.ts) - Ollama API client and metrics collection
+- Metrics definitions: [src/metrics.ts](mdc:src/metrics.ts) - Prometheus metric definitions and registry
+- Logging utilities: [src/logger.ts](mdc:src/logger.ts) - Centralized logging with configurable levels
+
+## Key Technologies
+- **Runtime**: Node.js 24+ with experimental TypeScript strip-types feature
+- **CLI Framework**: @commander-js/extra-typings for type-safe argument parsing
+- **Metrics**: prom-client for Prometheus metric exposition
+- **Build**: TypeScript compilation for type checking, direct TS execution for runtime
+- **Testing**: Vitest framework
+- **License**: GPL-3.0-only
+
+## Deployment Options
+- **Local**: Direct npm start execution
+- **Docker**: Multi-stage build with Node.js 24 Alpine
+- **Systemd**: Automated installation via [install-systemd.sh](mdc:install-systemd.sh)
+
+## Configuration
+All configuration can be provided via CLI arguments or environment variables, with CLI taking precedence. No .env file dependencies.

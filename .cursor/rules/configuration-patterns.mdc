@@ -1,0 +1,35 @@
+---
+globs: src/index.ts,*.config.*,package.json
+---
+
+# Configuration & CLI Patterns
+
+## CLI Argument Handling
+- Use @commander-js/extra-typings for type-safe CLI parsing
+- Support both short and long flag formats: `-p, --port`, `-i, --interval`, etc.
+- Environment variables should have the same names as CLI options but uppercase
+- CLI arguments take precedence over environment variables
+
+## Configuration Options
+Standard configuration options for the exporter:
+- **Port** (`-p, --port`): HTTP server port (default: 8000)
+- **Interval** (`-i, --interval`): Metrics scrape interval in seconds (default: 30)
+- **Ollama Host** (`--ollama-host`): Target Ollama server (default: localhost:11434)
+- **API Timeout** (`-t, --api-timeout`): HTTP timeout for Ollama API calls (default: 30)
+- **Log Level** (`-l, --log-level`): Logging verbosity (DEBUG, INFO, WARNING, ERROR)
+- **Validate Config** (`--validate-config`): Test configuration and exit
+
+## Environment Variables
+Map directly to CLI options with `process.env`:
+```typescript
+PORT=8000
+INTERVAL=30
+OLLAMA_HOST=localhost:11434
+API_TIMEOUT=30
+LOG_LEVEL=INFO
+```
+
+## Validation
+- Implement `--validate-config` flag to test Ollama connectivity before starting
+- Validate numeric inputs (port, interval, timeout) and provide helpful error messages
+- Ensure proper type conversion from string CLI/env inputs to expected types
