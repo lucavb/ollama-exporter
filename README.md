@@ -10,9 +10,81 @@ Minimal exporter that scrapes an Ollama server and exposes Prometheus metrics at
 
 ### Requirements
 
-- Node.js 24+
+- Docker (recommended) OR Node.js 24+
 - Ollama server reachable from the exporter
 - For systemd install: Linux with systemd
+
+### Docker
+
+Build:
+
+```bash
+docker build -t ollama-exporter:latest .
+```
+
+Run (adjust `OLLAMA_HOST` to where Ollama is reachable):
+
+```bash
+docker run --rm -p 8000:8000 \
+  -e PORT=8000 \
+  -e INTERVAL=30 \
+  -e OLLAMA_HOST=host.docker.internal:11434 \
+  -e API_TIMEOUT=30 \
+  -e LOG_LEVEL=INFO \
+  --name ollama-exporter \
+  ollama-exporter:latest
+```
+
+### Docker Compose
+
+Example `docker-compose.yml` that runs the exporter alongside Prometheus:
+
+```yaml
+services:
+    ollama-exporter:
+        build: .
+        ports:
+            - '8000:8000'
+        environment:
+            - PORT=8000
+            - INTERVAL=30
+            - OLLAMA_HOST=host.docker.internal:11434
+            - API_TIMEOUT=30
+            - LOG_LEVEL=INFO
+        restart: unless-stopped
+
+    prometheus:
+        image: prom/prometheus:latest
+        ports:
+            - '9090:9090'
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/prometheus'
+            - '--web.console.libraries=/etc/prometheus/console_libraries'
+            - '--web.console.templates=/etc/prometheus/consoles'
+        restart: unless-stopped
+```
+
+Example `prometheus.yml` configuration:
+
+```yaml
+global:
+    scrape_interval: 30s
+
+scrape_configs:
+    - job_name: 'ollama-exporter'
+      static_configs:
+          - targets: ['ollama-exporter:8000']
+      scrape_interval: 30s
+```
+
+Start with:
+
+```bash
+docker compose up -d
+```
 
 ### Quick start (local)
 
@@ -69,27 +141,6 @@ sudo rm -f /etc/systemd/system/ollama-exporter.service
 sudo rm -f /etc/ollama-exporter.env
 sudo rm -rf /opt/ollama-exporter
 sudo systemctl daemon-reload
-```
-
-### Docker
-
-Build:
-
-```bash
-docker build -t ollama-exporter:latest .
-```
-
-Run (adjust `OLLAMA_HOST` to where Ollama is reachable):
-
-```bash
-docker run --rm -p 8000:8000 \
-  -e PORT=8000 \
-  -e INTERVAL=30 \
-  -e OLLAMA_HOST=host.docker.internal:11434 \
-  -e API_TIMEOUT=30 \
-  -e LOG_LEVEL=INFO \
-  --name ollama-exporter \
-  ollama-exporter:latest
 ```
 
 ### Configuration options
