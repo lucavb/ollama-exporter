@@ -10,7 +10,6 @@
     ],
 
     timezone: 'Europe/Berlin',
-    schedule: ['before 6am on monday'],
 
     packageRules: [
         {
