@@ -1,68 +1,60 @@
 {
-    $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-
+    $schema: "https://docs.renovatebot.com/renovate-schema.json",
     extends: [
-        'config:recommended',
-        'docker:enableMajor',
-        ':dependencyDashboard',
-        ':semanticCommits',
-        ':separateMultipleMajorReleases',
+        "config:recommended",
+        "docker:enableMajor",
+        ":dependencyDashboard",
+        ":semanticCommits",
+        ":separateMultipleMajorReleases",
     ],
-
-    timezone: 'Europe/Berlin',
-
+    timezone: "Europe/Berlin",
     packageRules: [
         {
-            groupName: 'Node.js dependencies',
-            matchManagers: ['npm'],
-            matchFileNames: ['package.json'],
-            schedule: ['before 6am on monday'],
+            matchCategories: ["docker"],
+            pinDigests: true,
         },
         {
-            groupName: 'Docker base images',
-            matchManagers: ['dockerfile'],
-            matchUpdateTypes: ['major', 'minor', 'patch'],
+            groupName: "Node.js dependencies",
+            matchManagers: ["npm"],
+            matchFileNames: ["package.json"],
+            schedule: ["before 6am on monday"],
+        },
+        {
+            groupName: "Docker base images",
+            matchManagers: ["dockerfile"],
+            matchUpdateTypes: ["major", "minor", "patch"],
         },
     ],
-
     npm: {
-        rangeStrategy: 'pin',
+        rangeStrategy: "pin",
     },
-
-    docker: {
-        pinDigests: true,
-    },
-
     prHourlyLimit: 2,
     prConcurrentLimit: 5,
     branchConcurrentLimit: 10,
-
-    commitMessageTopic: '{{depName}}',
-    commitMessageAction: 'update',
-    commitMessageExtra: 'to {{newVersion}}',
-
-    labels: ['dependencies'],
-    addLabels: ['renovate'],
-
+    commitMessageTopic: "{{depName}}",
+    commitMessageAction: "update",
+    commitMessageExtra: "to {{newVersion}}",
+    labels: ["dependencies"],
+    addLabels: ["renovate"],
     vulnerabilityAlerts: {
         enabled: true,
-        schedule: ['at any time'],
-        labels: ['security'],
-        assignees: ['@lucabecker'],
+        schedule: ["at any time"],
+        labels: ["security"],
+        assignees: ["@lucabecker"],
     },
-
     customManagers: [
         {
-            customType: 'regex',
-            fileMatch: ['^src/index\\.ts$'],
-            matchStrings: ['export const VERSION = [\'"](?<currentValue>.*?)[\'"];'],
-            depNameTemplate: 'ollama-exporter',
-            datasourceTemplate: 'github-tags',
-            lookupNameTemplate: 'lucabecker/ollama-exporter',
+            customType: "regex",
+            managerFilePatterns: ["/^src/index\\.ts$/"],
+            matchStrings: [
+                "export const VERSION = ['\"](?<currentValue>.*?)['\"];",
+            ],
+            depNameTemplate: "ollama-exporter",
+            datasourceTemplate: "github-tags",
+            packageNameTemplate: "lucabecker/ollama-exporter",
         },
     ],
-
     dependencyDashboard: true,
-    dependencyDashboardTitle: '🤖 Dependency Updates Dashboard',
-    dependencyDashboardHeader: 'This issue contains a list of Renovate updates and their statuses.',
+    dependencyDashboardTitle: "🤖 Dependency Updates Dashboard",
+    dependencyDashboardHeader: "This issue contains a list of Renovate updates and their statuses.",
 }
