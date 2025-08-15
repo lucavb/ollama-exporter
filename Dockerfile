@@ -1,5 +1,5 @@
-# syntax=docker/dockerfile:1
-FROM node:24-alpine AS builder
+# syntax=docker/dockerfile:1@sha256:38387523653efa0039f8e1c89bb74a30504e76ee9f565e25c9a09841f9427b05
+FROM node:24-alpine@sha256:dec6d30010dc33ae4bb341a47b49c7add553b0a1213d9bac6b7fea1e3b5e35a4 AS builder
 
 # Build application
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY src ./src
 RUN npm ci --omit=dev
 
 # Runtime image
-FROM node:24-alpine
+FROM node:24-alpine@sha256:dec6d30010dc33ae4bb341a47b49c7add553b0a1213d9bac6b7fea1e3b5e35a4
 
 # Add non-root user
 RUN adduser -D ollama-exporter
