@@ -58,15 +58,23 @@ export class OllamaExporter extends EventEmitter {
 
     constructor(ollamaHost: string, apiTimeout: number, httpClient: HttpClient) {
         super();
-        this.baseUrl = `http://${ollamaHost}/api`;
+        const hostWithPort = this.ensurePortInHost(ollamaHost);
+        this.baseUrl = `http://${hostWithPort}/api`;
         this.apiTimeout = apiTimeout * 1000; // Convert to milliseconds
         this.httpClient = httpClient;
 
-        EXPORTER_INFO.labels(VERSION, ollamaHost, process.version).set(1);
+        EXPORTER_INFO.labels(VERSION, hostWithPort, process.version).set(1);
     }
 
     isShuttingDown(): boolean {
         return this.shutdownEvent;
+    }
+
+    private ensurePortInHost(host: string): string {
+        if (host.includes(':')) {
+            return host;
+        }
+        return `${host}:11434`;
     }
 
     private async apiRequest<T>(endpoint: string, method = 'GET', data?: unknown): Promise<T | null> {
