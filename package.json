@@ -5,14 +5,16 @@
     "main": "src/index.ts",
     "type": "module",
     "scripts": {
-        "build": "tsc --noEmit",
+        "build": "tsc --project tsconfig.build.json",
         "start": "node --experimental-strip-types src/index.ts",
+        "start:dist": "node dist/index.js",
         "dev": "node --experimental-strip-types src/index.ts",
         "validate-config": "node --experimental-strip-types src/index.ts --validate-config",
-        "cq": "npm run cq:eslint && npm run cq:format:check",
+        "cq": "npm run cq:eslint && npm run cq:format:check && npm run cq:typecheck",
         "cq:eslint": "eslint src",
         "cq:format": "prettier --write .",
         "cq:format:check": "prettier --check .",
+        "cq:typecheck": "tsc --noEmit --project tsconfig.spec.json",
         "cq:test": "vitest run",
         "test": "vitest run",
         "semantic-release": "semantic-release"

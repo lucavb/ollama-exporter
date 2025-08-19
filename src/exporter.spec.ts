@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OllamaExporter } from './exporter.ts';
-import { HttpClient, HttpResponse } from './http-client.ts';
+import type { HttpClient, HttpResponse } from './http-client.ts';
 
 // Mock the index.ts module to prevent it from running during tests
 vi.mock('./index.ts', () => ({
