@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { logger } from './logger.ts';
-import { HttpClient } from './http-client.ts';
+import type { HttpClient } from './http-client.ts';
 import {
     EXPORTER_INFO,
     OLLAMA_UP,
