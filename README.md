@@ -10,19 +10,14 @@ Minimal exporter that scrapes an Ollama server and exposes Prometheus metrics at
 
 ### Requirements
 
-- Docker (recommended) OR Node.js 24+
+- Docker (Docker Hub image available at [lucabecker42/ollama-exporter](https://hub.docker.com/r/lucabecker42/ollama-exporter))
 - Ollama server reachable from the exporter
+- For local development: Node.js 24+
 - For systemd install: Linux with systemd
 
-### Docker
+### Docker (Recommended)
 
-Build:
-
-```bash
-docker build -t ollama-exporter:latest .
-```
-
-Run (adjust `OLLAMA_HOST` to where Ollama is reachable):
+Pull and run the published image from Docker Hub:
 
 ```bash
 docker run --rm -p 8000:8000 \
@@ -32,8 +27,10 @@ docker run --rm -p 8000:8000 \
   -e API_TIMEOUT=30 \
   -e LOG_LEVEL=INFO \
   --name ollama-exporter \
-  ollama-exporter:latest
+  lucabecker42/ollama-exporter:latest
 ```
+
+The image is available at: https://hub.docker.com/r/lucabecker42/ollama-exporter
 
 ### Docker Compose
 
@@ -42,7 +39,7 @@ Example `docker-compose.yml` that runs the exporter alongside Prometheus:
 ```yaml
 services:
     ollama-exporter:
-        build: .
+        image: lucabecker42/ollama-exporter:latest
         ports:
             - '8000:8000'
         environment:
@@ -85,27 +82,6 @@ Start with:
 ```bash
 docker compose up -d
 ```
-
-### Quick start (local)
-
-1. Install dependencies
-
-```bash
-npm install
-```
-
-2. Run
-
-```bash
-npm start -- \
-  --port 8000 \
-  --interval 30 \
-  --ollama-host localhost:11434 \
-  --api-timeout 30 \
-  --log-level INFO
-```
-
-Visit `http://localhost:8000/metrics` and `http://localhost:8000/health`.
 
 ### Systemd install
 
@@ -158,6 +134,43 @@ sudo systemctl daemon-reload
 - job_name: 'ollama-exporter'
   static_configs:
       - targets: ['exporter-hostname:8000']
+```
+
+### Development
+
+If you want to build from source or contribute to the project:
+
+#### Building Docker image locally
+
+```bash
+docker build -t ollama-exporter:latest .
+```
+
+#### Local development
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Run in development mode:
+
+```bash
+npm start -- \
+  --port 8000 \
+  --interval 30 \
+  --ollama-host localhost:11434 \
+  --api-timeout 30 \
+  --log-level INFO
+```
+
+Visit `http://localhost:8000/metrics` and `http://localhost:8000/health`.
+
+#### Testing
+
+```bash
+npm test
 ```
 
 ### Maintainer
