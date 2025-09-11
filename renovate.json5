@@ -1,6 +1,5 @@
 {
     $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-
     extends: [
         'config:recommended',
         'docker:enableMajor',
@@ -8,10 +7,12 @@
         ':semanticCommits',
         ':separateMultipleMajorReleases',
     ],
-
     timezone: 'Europe/Berlin',
-
     packageRules: [
+        {
+            matchCategories: ['docker'],
+            pinDigests: true,
+        },
         {
             groupName: 'Node.js dependencies',
             matchManagers: ['npm'],
@@ -24,44 +25,33 @@
             matchUpdateTypes: ['major', 'minor', 'patch'],
         },
     ],
-
     npm: {
         rangeStrategy: 'pin',
     },
-
-    docker: {
-        pinDigests: true,
-    },
-
     prHourlyLimit: 2,
     prConcurrentLimit: 5,
     branchConcurrentLimit: 10,
-
     commitMessageTopic: '{{depName}}',
     commitMessageAction: 'update',
     commitMessageExtra: 'to {{newVersion}}',
-
     labels: ['dependencies'],
     addLabels: ['renovate'],
-
     vulnerabilityAlerts: {
         enabled: true,
         schedule: ['at any time'],
         labels: ['security'],
         assignees: ['@lucabecker'],
     },
-
     customManagers: [
         {
             customType: 'regex',
-            fileMatch: ['^src/index\\.ts$'],
+            managerFilePatterns: ['/^src/index\\.ts$/'],
             matchStrings: ['export const VERSION = [\'"](?<currentValue>.*?)[\'"];'],
             depNameTemplate: 'ollama-exporter',
             datasourceTemplate: 'github-tags',
-            lookupNameTemplate: 'lucabecker/ollama-exporter',
+            packageNameTemplate: 'lucabecker/ollama-exporter',
         },
     ],
-
     dependencyDashboard: true,
     dependencyDashboardTitle: '🤖 Dependency Updates Dashboard',
     dependencyDashboardHeader: 'This issue contains a list of Renovate updates and their statuses.',
