@@ -20,8 +20,8 @@ WORKDIR /app
 COPY --from=builder --chown=ollama-exporter:ollama-exporter /app/node_modules ./node_modules
 COPY --from=builder --chown=ollama-exporter:ollama-exporter /app/src ./src
 COPY --from=builder --chown=ollama-exporter:ollama-exporter /app/package.json ./
-COPY --chown=ollama-exporter:ollama-exporter docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
+COPY --chown=ollama-exporter:ollama-exporter docker-entrypoint.sh docker-healthcheck.sh ./
+RUN chmod +x docker-entrypoint.sh docker-healthcheck.sh
 
 # Labels
 LABEL org.opencontainers.image.title="ollama-exporter" \
@@ -35,7 +35,7 @@ USER ollama-exporter
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "fetch('http://localhost:8000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))" || exit 1
+  CMD ["./docker-healthcheck.sh"]
 
 EXPOSE 8000
 
