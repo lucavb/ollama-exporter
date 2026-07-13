@@ -77,6 +77,18 @@ export class OllamaExporter extends EventEmitter {
         return `${host}:11434`;
     }
 
+    private modelInfoLabels(model: OllamaModel) {
+        const details = model.details || {};
+        return {
+            model_name: model.name || 'unknown',
+            family: details.family || 'unknown',
+            format: details.format || 'unknown',
+            parameter_size: details.parameter_size || 'unknown',
+            quantization_level: details.quantization_level || 'unknown',
+            parent_model: details.parent_model || 'unknown',
+        };
+    }
+
     private async apiRequest<T>(endpoint: string, method = 'GET', data?: unknown): Promise<T | null> {
         try {
             const url = `${this.baseUrl}/${endpoint}`;
@@ -138,11 +150,11 @@ export class OllamaExporter extends EventEmitter {
 
             // Remove metrics for models that no longer exist
             const currentModels = new Set(models.map((m) => m.name || 'unknown'));
-            for (const oldModel of this.lastModels.keys()) {
-                if (!currentModels.has(oldModel)) {
-                    OLLAMA_MODEL_SIZE_BYTES.remove(oldModel);
-                    OLLAMA_MODEL_MODIFIED_TIMESTAMP.remove(oldModel);
-                    OLLAMA_MODEL_INFO.remove(oldModel);
+            for (const [oldModelName, oldModel] of this.lastModels) {
+                if (!currentModels.has(oldModelName)) {
+                    OLLAMA_MODEL_SIZE_BYTES.remove(oldModelName);
+                    OLLAMA_MODEL_MODIFIED_TIMESTAMP.remove(oldModelName);
+                    OLLAMA_MODEL_INFO.remove(this.modelInfoLabels(oldModel));
                 }
             }
 
@@ -152,16 +164,8 @@ export class OllamaExporter extends EventEmitter {
                 const name = model.name || 'unknown';
                 const size = model.size || 0;
                 const modifiedAt = model.modified_at || '';
-                const details = model.details || {};
 
-                OLLAMA_MODEL_INFO.labels(
-                    name,
-                    details.family || 'unknown',
-                    details.format || 'unknown',
-                    details.parameter_size || 'unknown',
-                    details.quantization_level || 'unknown',
-                    details.parent_model || 'unknown',
-                ).set(1);
+                OLLAMA_MODEL_INFO.labels(this.modelInfoLabels(model)).set(1);
 
                 OLLAMA_MODEL_SIZE_BYTES.labels(name).set(size);
 

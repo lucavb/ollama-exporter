@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OllamaExporter } from './exporter.ts';
 import type { HttpClient, HttpResponse } from './http-client.ts';
+import { OLLAMA_MODEL_INFO, OLLAMA_MODEL_SIZE_BYTES, OLLAMA_MODEL_MODIFIED_TIMESTAMP } from './metrics.ts';
 
 // Mock the index.ts module to prevent it from running during tests
 vi.mock('./index.ts', () => ({
@@ -13,7 +14,7 @@ vi.mock('./metrics.ts', () => ({
     OLLAMA_UP: { set: vi.fn() },
     OLLAMA_VERSION_INFO: { labels: vi.fn().mockReturnValue({ set: vi.fn() }) },
     OLLAMA_MODELS_TOTAL: { set: vi.fn() },
-    OLLAMA_MODEL_INFO: { labels: vi.fn().mockReturnValue({ set: vi.fn() }) },
+    OLLAMA_MODEL_INFO: { labels: vi.fn().mockReturnValue({ set: vi.fn() }), remove: vi.fn() },
     OLLAMA_MODEL_SIZE_BYTES: { labels: vi.fn().mockReturnValue({ set: vi.fn() }), remove: vi.fn() },
     OLLAMA_MODEL_MODIFIED_TIMESTAMP: { labels: vi.fn().mockReturnValue({ set: vi.fn() }), remove: vi.fn() },
     OLLAMA_RUNNING_MODELS: { labels: vi.fn().mockReturnValue({ set: vi.fn() }), remove: vi.fn() },
@@ -214,6 +215,86 @@ describe('OllamaExporter', () => {
 
             // Should still attempt to call version endpoint
             expect(mockHttpClient.getRequestHistory()).toHaveLength(1);
+        });
+
+        it('should remove stale model metrics with full label set for complex model names', async () => {
+            const complexModelName = 'igorls/gemma-4-12B-it-qat-q4_0-unquantized-heretic:Q4_K_M';
+            const modelDetails = {
+                family: 'gemma',
+                format: 'gguf',
+                parameter_size: '12B',
+                quantization_level: 'Q4_K_M',
+                parent_model: '',
+            };
+
+            const versionResponse: HttpResponse<{ version: string }> = {
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: async () => ({ version: '0.1.15' }),
+            };
+
+            const tagsWithModel: HttpResponse<{
+                models: {
+                    name: string;
+                    size: number;
+                    modified_at: string;
+                    details: typeof modelDetails;
+                }[];
+            }> = {
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: async () => ({
+                    models: [
+                        {
+                            name: complexModelName,
+                            size: 8000000000,
+                            modified_at: '2023-12-07T09:32:18.757212583Z',
+                            details: modelDetails,
+                        },
+                    ],
+                }),
+            };
+
+            const tagsWithoutModel: HttpResponse<{ models: [] }> = {
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: async () => ({ models: [] }),
+            };
+
+            const psResponse: HttpResponse<{ models: [] }> = {
+                ok: true,
+                status: 200,
+                statusText: 'OK',
+                json: async () => ({ models: [] }),
+            };
+
+            mockHttpClient.setResponse('version', versionResponse);
+            mockHttpClient.setResponse('tags', tagsWithModel);
+            mockHttpClient.setResponse('ps', psResponse);
+
+            await exporter.updateMetrics();
+
+            vi.mocked(OLLAMA_MODEL_INFO.remove).mockClear();
+            vi.mocked(OLLAMA_MODEL_SIZE_BYTES.remove).mockClear();
+            vi.mocked(OLLAMA_MODEL_MODIFIED_TIMESTAMP.remove).mockClear();
+
+            mockHttpClient.setResponse('tags', tagsWithoutModel);
+            await exporter.updateMetrics();
+
+            expect(OLLAMA_MODEL_SIZE_BYTES.remove).toHaveBeenCalledWith(complexModelName);
+            expect(OLLAMA_MODEL_MODIFIED_TIMESTAMP.remove).toHaveBeenCalledWith(complexModelName);
+            expect(OLLAMA_MODEL_INFO.remove).toHaveBeenCalledOnce();
+            expect(OLLAMA_MODEL_INFO.remove).toHaveBeenCalledWith({
+                model_name: complexModelName,
+                family: 'gemma',
+                format: 'gguf',
+                parameter_size: '12B',
+                quantization_level: 'Q4_K_M',
+                parent_model: 'unknown',
+            });
         });
     });
 
